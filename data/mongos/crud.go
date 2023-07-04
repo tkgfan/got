@@ -1,0 +1,197 @@
+// author lby
+// date 2023/6/28
+
+package mongos
+
+import (
+	"context"
+	"github.com/tkgfan/got/core/errors"
+	"github.com/tkgfan/got/core/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"reflect"
+	"time"
+)
+
+// UpsertOne 如果upsert=true则有则修改，无则新增。如果 update 类型不是 bson.D
+// 则会被设置为 bson.D{{"$set",update}}
+func UpsertOne(ctx context.Context, table string, filter bson.D, update any, upsert bool) (*mongo.UpdateResult, error) {
+	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	opts := options.Update().SetUpsert(upsert)
+	if _, ok := update.(bson.D); !ok {
+		update = bson.D{{"$set", update}}
+	}
+
+	result, err := DB().Collection(table).UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func elemValueIfPointer(v reflect.Value) reflect.Value {
+	if v.Kind() == reflect.Pointer {
+		return v.Elem()
+	}
+	return v
+}
+
+// UpsertMany 批量更新，filters与updates必须一致且filters与updates中元素一一对应
+func UpsertMany(ctx context.Context, table string, filters []bson.D,
+	updates any, upsert bool) (res *mongo.BulkWriteResult, err error) {
+
+	upVal := reflect.ValueOf(updates)
+	upVal = elemValueIfPointer(upVal)
+
+	// 数据格式效验
+	if upVal.Kind() != reflect.Slice && upVal.Kind() != reflect.Array {
+		err = errors.New("updates必须为数组或切片")
+		return
+	} else if upVal.Len() != len(filters) {
+		err = errors.New("filters与updates长度必须一致")
+		return
+	}
+
+	var models []mongo.WriteModel
+	for i := 0; i < len(filters); i++ {
+		update := upVal.Index(i).Interface()
+		model := mongo.NewUpdateOneModel().
+			SetUpsert(upsert).
+			SetFilter(filters[i]).
+			SetUpdate(bson.D{{"$set", update}})
+		models = append(models, model)
+	}
+
+	opts := options.BulkWrite().SetOrdered(false)
+	res, err = DB().Collection(table).BulkWrite(ctx, models, opts)
+
+	return
+}
+
+// DelMany 根据 filter 软删除数据
+func DelMany(ctx context.Context, table string, filter bson.D, deletedBy int64) (err error) {
+	update := bson.D{{"$set", bson.D{
+		{"is_deleted", 1},
+		{"deleted_by", deletedBy},
+		{"deleted_at", time.Now().Unix()},
+	}}}
+
+	_, err = DB().Collection(table).UpdateMany(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+func handleProjections(projections []string) bson.M {
+	m := bson.M{}
+	for _, p := range projections {
+		m[p] = 1
+	}
+	return m
+}
+
+// Query 简化多文档查询
+func Query(ctx context.Context, table string, filter bson.D, res any, projections ...string) error {
+	// 只查询未删除文档
+	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	cur, err := DB().Collection(table).Find(ctx, filter, &options.FindOptions{
+		Projection: handleProjections(projections),
+	})
+	if err != nil {
+		return err
+	}
+	return cur.All(ctx, res)
+}
+
+// QueryOne 简化查询集合单条信息函数
+func QueryOne(ctx context.Context, table string, filter bson.D, res any, projections ...string) error {
+	// 只查询未删除文档
+	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	return DB().Collection(table).FindOne(ctx, filter, &options.FindOneOptions{
+		Projection: handleProjections(projections),
+	}).Decode(res)
+}
+
+// PageQuery 分页查询
+func PageQuery(ctx context.Context, table string, filter bson.D, page *model.Page, res any, projections ...string) (total int64, err error) {
+	collection := DB().Collection(table)
+	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	opts := &options.FindOptions{Projection: handleProjections(projections)}
+
+	handlerPage(opts, page)
+
+	cur, err := collection.Find(ctx, filter, opts)
+	if err != nil {
+		return
+	}
+
+	total, err = collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+
+	return total, cur.All(ctx, res)
+}
+
+func handlerPage(opts *options.FindOptions, page *model.Page) {
+	// 默认每页大小
+	opts.SetLimit(20)
+	// 处理排序
+	filter := bson.D{}
+	for _, v := range page.Sorts {
+		order := 1
+		if v.Order == model.DESC {
+			order = -1
+		}
+		filter = append(filter, bson.E{v.Condition, order})
+	}
+
+	if len(filter) > 0 {
+		opts.SetSort(filter)
+	}
+
+	// 处理分页
+	if page.Size != 0 {
+		opts.SetLimit(page.Size)
+		if page.Num > 0 {
+			opts.SetSkip((page.Num - 1) * page.Size)
+		}
+	}
+}
+
+type nextInt64 struct {
+	ID        string `bson:"_id"`
+	NextInt64 int64  `bson:"next_int64"`
+}
+
+// GetNextInt64 获取集合的自增值，此操作同时会更新集合的自增值。给定集合如果不存在
+// _id 为 next_int64 则会自动创建如下文档:
+//
+//	{
+//		"_id":"next_int64",
+//		"next_int64":1
+//	}
+//
+// 则会抛出异常
+func GetNextInt64(ctx context.Context, table string) (nextInt int64, err error) {
+	filter := bson.D{{"_id", "next_int64"}}
+	update := bson.D{{"$inc", bson.M{"next_int64": 1}}}
+	var res nextInt64
+	upsert := true
+	err = DB().Collection(table).FindOneAndUpdate(ctx, filter, update, &options.FindOneAndUpdateOptions{
+		Upsert: &upsert,
+	}).Decode(&res)
+	// 自动创建
+	if err == mongo.ErrNoDocuments {
+		err = nil
+		return 1, nil
+	}
+	if err != nil {
+		return nextInt, err
+	}
+	nextInt = res.NextInt64 + 1
+	return
+}
