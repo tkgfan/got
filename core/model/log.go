@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+const (
+	// LogStatusNormal 正常状态
+	LogStatusNormal = 0
+	// LogStatusErr 错误状态
+	LogStatusErr = 1
+)
+
 type (
 	// TraceLog 链路追踪日志模型
 	TraceLog struct {
@@ -15,10 +22,11 @@ type (
 	}
 
 	Log struct {
-		Start int64 `json:"start"`
-		Info  any   `json:"info"`
-		IsErr bool  `json:"is_err"`
-		End   int64 `json:"end"`
+		// 时间戳为毫秒
+		Start  int64 `json:"start"`
+		Info   any   `json:"info"`
+		Status int8  `json:"status"`
+		End    int64 `json:"end"`
 	}
 )
 
@@ -30,12 +38,12 @@ func NewTraceLog() *TraceLog {
 }
 
 func (t *TraceLog) AddLog(log *Log) {
-	log.End = time.Now().Unix()
+	log.End = time.Now().UnixMilli()
 	t.Logs = append(t.Logs, log)
 }
 
 func NewLog() *Log {
 	return &Log{
-		Start: time.Now().Unix(),
+		Start: time.Now().UnixMilli(),
 	}
 }
