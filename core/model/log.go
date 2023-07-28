@@ -24,9 +24,12 @@ type (
 	Log struct {
 		// 时间戳为毫秒
 		Start  int64 `json:"start"`
+		// 资源，可以是 URL 路径
+		Source string `json:"source"`
 		Info   any   `json:"info"`
 		Status int8  `json:"status"`
-		End    int64 `json:"end"`
+		// 花费时长
+		Expensive    int64 `json:"expensive"`
 	}
 )
 
@@ -38,7 +41,7 @@ func NewTraceLog() *TraceLog {
 }
 
 func (t *TraceLog) AddLog(log *Log) {
-	log.End = time.Now().UnixMilli()
+	log.Expensive = time.Now().UnixMilli()-log.Start
 	t.Logs = append(t.Logs, log)
 }
 
