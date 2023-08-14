@@ -17,17 +17,15 @@ type BaseModel struct {
 	IsDeleted int8               `bson:"is_deleted"`
 }
 
-func CreateBaseModel(uid int64) BaseModel {
-	return BaseModel{
-		ID:        primitive.NewObjectID(),
-		CreatedAt: time.Now().Unix(),
-		CreatedBy: time.Now().Unix(),
-		UpdatedBy: uid,
-		UpdatedAt: time.Now().Unix(),
-	}
+func (b *BaseModel) CreateByUID(uid int64) {
+	now := time.Now().Unix()
+	b.CreatedBy = uid
+	b.CreatedAt = now
+	b.UpdatedBy = uid
+	b.UpdatedAt = now
 }
 
-func (b *BaseModel) Update(uid int64) {
+func (b *BaseModel) UpdateByUID(uid int64) {
 	b.UpdatedBy = uid
 	b.UpdatedAt = time.Now().Unix()
 }
