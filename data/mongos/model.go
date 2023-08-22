@@ -9,12 +9,12 @@ import (
 )
 
 type BaseModel struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	CreatedBy int64              `bson:"created_by,omitempty"`
-	CreatedAt int64              `bson:"created_at,omitempty"`
-	UpdatedBy int64              `bson:"updated_by,omitempty"`
-	UpdatedAt int64              `bson:"updated_at,omitempty"`
-	IsDeleted int8               `bson:"is_deleted"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	CreatedBy int64              `bson:"created_by,omitempty" json:"createdBy"`
+	CreatedAt int64              `bson:"created_at,omitempty" json:"createdAt"`
+	UpdatedBy int64              `bson:"updated_by,omitempty" json:"updatedBy"`
+	UpdatedAt int64              `bson:"updated_at,omitempty" json:"updatedAt"`
+	IsDeleted int8               `bson:"is_deleted" json:"isDeleted"`
 }
 
 func (b *BaseModel) CreateByUID(uid int64) {

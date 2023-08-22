@@ -6,9 +6,13 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"github.com/redis/go-redis/v9"
 	"github.com/tkgfan/got/core/errors"
 	"time"
 )
+
+// Nil reply returned by Redis when key does not exist.
+var Nil = redis.Nil
 
 // Set 设置键值对，expire 单位为秒。此方法会对 value 进行序列化
 func Set(ctx context.Context, key string, value any, expire int64) (err error) {
