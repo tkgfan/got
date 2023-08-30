@@ -17,7 +17,7 @@ import (
 // UpsertOne 如果upsert=true则有则修改，无则新增。如果 update 类型不是 bson.D
 // 则会被设置为 bson.D{{"$set",update}}
 func UpsertOne(ctx context.Context, table string, filter bson.D, update any, upsert bool) (*mongo.UpdateResult, error) {
-	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	filter = wrapNeDeleted(filter)
 	opts := options.Update().SetUpsert(upsert)
 	if _, ok := update.(bson.D); !ok {
 		update = bson.D{{"$set", update}}
@@ -29,6 +29,28 @@ func UpsertOne(ctx context.Context, table string, filter bson.D, update any, ups
 	}
 
 	return result, nil
+}
+
+func UpdateOne(ctx context.Context, table string, filter bson.D, update any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	filter = wrapNeDeleted(filter)
+	return DB().Collection(table).UpdateOne(ctx, filter, update, opts...)
+}
+
+func UpdateMany(ctx context.Context, table string, filter bson.D, update any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	filter = wrapNeDeleted(filter)
+	return DB().Collection(table).UpdateMany(ctx, filter, update, opts...)
+}
+
+func InsertOne(ctx context.Context, table string, document any, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	return DB().Collection(table).InsertOne(ctx, document, opts...)
+}
+
+func InsertMany(ctx context.Context, table string, documents []any, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+	return DB().Collection(table).InsertMany(ctx, documents, opts...)
+}
+
+func wrapNeDeleted(filter bson.D) bson.D {
+	return append(filter, bson.E{Key: "is_deleted", Value: bson.M{"$ne": 1}})
 }
 
 func elemValueIfPointer(v reflect.Value) reflect.Value {
@@ -96,7 +118,7 @@ func handleProjections(projections []string) bson.M {
 // Query 简化多文档查询
 func Query(ctx context.Context, table string, filter bson.D, res any, projections ...string) error {
 	// 只查询未删除文档
-	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	filter = wrapNeDeleted(filter)
 	cur, err := DB().Collection(table).Find(ctx, filter, &options.FindOptions{
 		Projection: handleProjections(projections),
 	})
@@ -109,7 +131,7 @@ func Query(ctx context.Context, table string, filter bson.D, res any, projection
 // QueryOne 简化查询集合单条信息函数
 func QueryOne(ctx context.Context, table string, filter bson.D, res any, projections ...string) error {
 	// 只查询未删除文档
-	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	filter = wrapNeDeleted(filter)
 	return DB().Collection(table).FindOne(ctx, filter, &options.FindOneOptions{
 		Projection: handleProjections(projections),
 	}).Decode(res)
@@ -118,7 +140,7 @@ func QueryOne(ctx context.Context, table string, filter bson.D, res any, project
 // PageQuery 分页查询
 func PageQuery(ctx context.Context, table string, filter bson.D, page *model.Page, res any, projections ...string) (total int64, err error) {
 	collection := DB().Collection(table)
-	filter = append(filter, bson.E{Key: "is_deleted", Value: 0})
+	filter = wrapNeDeleted(filter)
 	opts := &options.FindOptions{Projection: handleProjections(projections)}
 
 	handlerPage(opts, page)
