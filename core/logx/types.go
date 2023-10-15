@@ -1,6 +1,6 @@
 // author gmfan
 // date 2023/6/27
-package model
+package logx
 
 import (
 	"github.com/tkgfan/got/core/strings"
@@ -8,50 +8,50 @@ import (
 )
 
 const (
-	// LogStatusNormal 正常状态
-	LogStatusNormal = 0
-	// LogStatusErr 错误状态
-	LogStatusErr = 1
+	// StatusNormal 正常状态
+	StatusNormal = 0
+	// StatusErr 错误状态
+	StatusErr = 1
 )
 
 type (
 	// TraceLog 链路追踪日志模型
 	TraceLog struct {
-		ID   string `json:"id"`
+		ID string `json:"id"`
 		// 时间戳为毫秒
-		Start  int64 `json:"start"`
+		Start int64 `json:"start"`
 		// 资源，可以是 URL 路径
 		Source string `json:"source"`
 		// 花费时长，此值会自动更新
-		Expensive    int64 `json:"expensive"`
-		Logs []*Log `json:"logs"`
+		Expensive int64  `json:"expensive"`
+		Logs      []*Log `json:"logs"`
 	}
 
 	Log struct {
 		// 时间戳为毫秒
-		Start  int64 `json:"start"`
+		Start int64 `json:"start"`
 		// 资源，可以是 URL 路径
 		Source string `json:"source"`
-		Info   any   `json:"info"`
-		Status int8  `json:"status"`
+		Info   any    `json:"info"`
+		Status int8   `json:"status"`
 		// 花费时长，此值会自动更新
-		Expensive    int64 `json:"expensive"`
+		Expensive int64 `json:"expensive"`
 	}
 )
 
 func NewTraceLog() *TraceLog {
 	return &TraceLog{
-		ID:   strings.Rand(16),
+		ID:    strings.Rand(16),
 		Start: time.Now().UnixMilli(),
-		Logs: make([]*Log, 0),
+		Logs:  make([]*Log, 0),
 	}
 }
 
 func (t *TraceLog) AddLog(log *Log) {
 	// 计算 Expensive
-	curMilli:=time.Now().UnixMilli()
-	log.Expensive = curMilli -log.Start
-	t.Expensive=curMilli-t.Start
+	curMilli := time.Now().UnixMilli()
+	log.Expensive = curMilli - log.Start
+	t.Expensive = curMilli - t.Start
 
 	t.Logs = append(t.Logs, log)
 }

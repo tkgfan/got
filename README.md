@@ -35,6 +35,10 @@ go get github.com/tkgfan/got
 
 - Rand(len int) string: 生成随机 token 字符串，len 为 token 长度。
 
+### logx
+
+日志工具
+
 ## data
 
 此文件夹下为与数据库相关的工具
