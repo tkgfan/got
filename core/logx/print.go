@@ -34,34 +34,34 @@ func Info(v ...any) {
 	if level == ErrorLevel || level == PanicLevel {
 		return
 	}
-	log.Println(v)
+	log.Println(v...)
 }
 
 func Infof(format string, v ...any) {
 	if level == ErrorLevel || level == PanicLevel {
 		return
 	}
-	log.Printf(format, v)
+	log.Printf(format, v...)
 }
 
 func Error(v ...any) {
 	if level == PanicLevel {
 		return
 	}
-	log.Println(redColor + fmt.Sprint(v))
+	log.Println(redColor + fmt.Sprint(v...))
 }
 
 func Errorf(format string, v ...any) {
 	if level == PanicLevel {
 		return
 	}
-	log.Println(redColor + fmt.Sprintf(format, v))
+	log.Println(redColor + fmt.Sprintf(format, v...))
 }
 
 func Panic(v ...any) {
-	log.Panicln(v)
+	log.Panicln(redColor + fmt.Sprint(v...))
 }
 
 func Panicf(format string, v ...any) {
-	log.Panicf(format, v)
+	log.Panicf(redColor+format, v...)
 }
