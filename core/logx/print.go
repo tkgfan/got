@@ -10,16 +10,21 @@ import (
 	"log"
 )
 
-const (
-	redColor = "\x1B[31m"
-)
-
 // 日志级别
 const (
 	InfoLevel  = "info"
 	ErrorLevel = "error"
 	PanicLevel = "panic"
 )
+
+const (
+	redColorStart = "\033[31m "
+	redColorEnd   = "\033[0m"
+)
+
+func red(str string) string {
+	return redColorStart + str + redColorEnd
+}
 
 var level = InfoLevel
 
@@ -48,20 +53,20 @@ func Error(v ...any) {
 	if level == PanicLevel {
 		return
 	}
-	log.Println(redColor + fmt.Sprint(v...))
+	log.Println(red(fmt.Sprint(v...)))
 }
 
 func Errorf(format string, v ...any) {
 	if level == PanicLevel {
 		return
 	}
-	log.Println(redColor + fmt.Sprintf(format, v...))
+	log.Println(red(fmt.Sprintf(format, v...)))
 }
 
 func Panic(v ...any) {
-	log.Panicln(redColor + fmt.Sprint(v...))
+	log.Panicln(red(fmt.Sprint(v...)))
 }
 
 func Panicf(format string, v ...any) {
-	log.Panicf(redColor+format, v...)
+	log.Panicf(red(format), v...)
 }
