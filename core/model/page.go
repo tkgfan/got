@@ -23,7 +23,14 @@ type (
 	}
 
 	PageResult struct {
-		Rows  []any `json:"rows"`
+		Rows  any   `json:"rows"`
 		Total int64 `json:"total"`
 	}
 )
+
+func NewPageResult(rows any, total int64) *PageResult {
+	return &PageResult{
+		Rows:  rows,
+		Total: total,
+	}
+}
