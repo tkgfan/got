@@ -2,6 +2,8 @@
 // date 2023/6/27
 package model
 
+import "github.com/tkgfan/got/core/slices"
+
 const (
 	// ASC 升序
 	ASC = "asc"
@@ -30,7 +32,7 @@ type (
 
 func NewPageResult(rows any, total int64) *PageResult {
 	return &PageResult{
-		Rows:  rows,
+		Rows:  slices.ToInterfaceSlice(rows),
 		Total: total,
 	}
 }
