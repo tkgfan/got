@@ -11,56 +11,78 @@ type (
 
 	trieNode struct {
 		// 字符
-		c     rune
-		child map[rune]*trieNode
+		c        rune
+		children map[rune]*trieNode
 		// 字符串长度，当字符串不存在时为 0 ，存在则为字符串长度
-		len  int
+		len int
+		// 失配指针，指向最长后缀节点
 		fail *trieNode
 	}
 )
 
-// 是否存在子节点
-func (t *trieNode) hasChild(k rune) bool {
-	_, ok := t.child[k]
-	return ok
-}
-
 func NewAC() *AC {
 	return &AC{
 		root: &trieNode{
-			child: make(map[rune]*trieNode),
+			children: make(map[rune]*trieNode),
 		},
 	}
 }
 
+// addWord 字典树添加单词 world
+func (t *trieNode) addWord(world []rune) {
+	// p 作为根节点
+	p := t
+	// 遍历所有字符，依次加入字典树中
+	for _, c := range world {
+		if v, ok := p.children[c]; ok {
+			// 子节点已存在
+			p = v
+		} else {
+			// 节点不存在，创建新子节点
+			p.children[c] = &trieNode{
+				c:        c,
+				children: make(map[rune]*trieNode),
+			}
+			p = p.children[c]
+		}
+	}
+	// 设置节点单词长度
+	p.len = len(world)
+}
+
 // AddWords 将单词添加到 AC 自动机中
 func (a *AC) AddWords(words ...string) {
+	// 将单词添加到字典树中
 	for _, word := range words {
-		cs := []rune(word)
-		p := a.root
-		for _, c := range cs {
-			if v, ok := p.child[c]; ok {
-				p = v
-			} else {
-				p.child[c] = &trieNode{
-					c:     c,
-					child: make(map[rune]*trieNode),
-				}
-				p = p.child[c]
-			}
-		}
-		p.len = len(cs)
+		a.root.addWord([]rune(word))
 	}
 
 	// 重新构建失配指针
 	a.buildFail()
 }
 
+// 是否存在子节点
+func (t *trieNode) hasChild(k rune) bool {
+	_, ok := t.children[k]
+	return ok
+}
+
+// 获取存在子节点 c 的失配指针
+func (a *AC) getFailHasChild(fail *trieNode, c rune) *trieNode {
+	for fail != nil {
+		if _, ok := fail.children[c]; ok {
+			return fail
+		}
+		fail = fail.fail
+	}
+	return nil
+}
+
 // buildFail 构建失配指针
 func (a *AC) buildFail() {
 	var que []*trieNode
 	// 将 root 的所有子节点加入到队列中
-	for _, v := range a.root.child {
+	for _, v := range a.root.children {
 		v.fail = a.root
 		que = append(que, v)
 	}
@@ -69,12 +91,13 @@ func (a *AC) buildFail() {
 	for len(que) > 0 {
 		p := que[0]
 		que = que[1:]
-		for r, node := range p.child {
-			f := a.hasRuneFail(p.fail, r)
+		for r, node := range p.children {
+			// 获取子节点存在 r 的失配指针
+			f := a.getFailHasChild(p.fail, r)
 			if f == nil {
 				node.fail = a.root
 			} else {
-				node.fail = f.child[r]
+				node.fail = f.children[r]
 			}
 
 			que = append(que, node)
@@ -89,12 +112,12 @@ func (a *AC) FindFirst(text string) (word string, index int) {
 	cur := a.root
 	for i, r := range rs {
 		f := cur.fail
-		cur = cur.child[r]
+		cur = cur.children[r]
 		// 当前字符不匹配使用失配指针跳转到最近一个可匹配位置
 		if cur == nil {
-			f = a.hasRuneFail(f, r)
+			f = a.getFailHasChild(f, r)
 			if f != nil {
-				cur = f.child[r]
+				cur = f.children[r]
 			}
 		}
 
@@ -103,6 +126,7 @@ func (a *AC) FindFirst(text string) (word string, index int) {
 			cur = a.root
 			// 匹配到单词
 		} else if cur.len > 0 {
+			// 匹配成功
 			index = i - cur.len + 1
 			return string(rs[index : i+1]), index
 		}
@@ -110,13 +134,82 @@ func (a *AC) FindFirst(text string) (word string, index int) {
 	return word, -1
 }
 
-// 获取第一个 child 中存在 r 的失配指针，失配指针不存在则返回 nil
-func (a *AC) hasRuneFail(fail *trieNode, r rune) *trieNode {
-	for fail != nil {
-		if fail.hasChild(r) {
-			return fail
-		}
-		fail = fail.fail
+// WrapByFn 将文本中所有匹配的单词使用 fn 函数包裹起来后返回 text 处理结果
+func (a *AC) WrapByFn(text string, fn func(word string) string) (resText string, words []string) {
+	bitMap, words := a.BitMap(text)
+	if len(words) == 0 {
+		// 没有模式串匹配到
+		return text, words
 	}
-	return nil
+
+	rs := []rune(text)
+	idx, l, r := 0, 0, 0
+	for l < len(bitMap) && r < len(bitMap) {
+		for l < len(bitMap) && !bitMap[l] {
+			l++
+		}
+		r = l
+		for r < len(bitMap) && bitMap[r] {
+			r++
+		}
+		if (r-l) > 1 && r <= len(bitMap) {
+			if idx < l {
+				resText += string(rs[idx:l])
+				idx = r
+			}
+			resText += fn(string(rs[l:r]))
+			idx = r
+		}
+		l = r
+	}
+	resText += string(rs[idx:])
+	return
+}
+
+// BitMap 获取 text 的位图。
+// 示例：
+// text="hello"
+// 模式串="llo"
+// 结果：
+// bitMap=[false,false,true,true,true]
+// words=["llo"]
+func (a *AC) BitMap(text string) (bitMap []bool, words []string) {
+	rs := []rune(text)
+	// 位图
+	bitMap = make([]bool, len(rs))
+	// 开始匹配
+	cur := a.root
+	for i, r := range rs {
+		for cur.children[r] == nil && cur != a.root {
+			cur = cur.fail
+		}
+		if cur.children[r] != nil {
+			cur = cur.children[r]
+		}
+		if cur.len > 0 {
+			// 匹配成功
+			left := i - cur.len + 1
+			fillBitMap(bitMap, left, i, true)
+			words = append(words, string(rs[left:i+1]))
+		}
+
+		// 失配指针可能还存在匹配模式串
+		fail := cur.fail
+		for fail != nil {
+			if fail.len > 0 {
+				// 匹配成功
+				left := i - cur.len + 1
+				fillBitMap(bitMap, left, i, true)
+				words = append(words, string(rs[left:i+1]))
+			}
+			fail = fail.fail
+		}
+	}
+	return
+}
+
+func fillBitMap(bitMap []bool, left, right int, flag bool) {
+	for i := left; i <= right; i++ {
+		bitMap[i] = flag
+	}
 }

@@ -34,6 +34,7 @@ go get github.com/tkgfan/got
 ### strings
 
 - Rand(len int) string: 生成随机 token 字符串，len 为 token 长度。
+- WrapByFn：基于 AC 自动机进行模式串匹配并自定义处理模式串
 
 ### logx
 
