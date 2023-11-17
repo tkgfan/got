@@ -117,6 +117,16 @@ func TestAC_WrapByFn(t *testing.T) {
 			resText: "*NIKE* fdjksfjie",
 			words:   []string{"NIKE"},
 		},
+		{
+			name:     "普通测试-4",
+			patterns: []string{"NIKE", " NIKE123"},
+			text:     " NIKE",
+			fn: func(word string) string {
+				return "*" + word + "*"
+			},
+			resText: " *NIKE*",
+			words:   []string{"NIKE"},
+		},
 	}
 
 	for _, tt := range tests {

@@ -198,7 +198,7 @@ func (a *AC) BitMap(text string) (bitMap []bool, words []string) {
 		for fail != nil {
 			if fail.len > 0 {
 				// 匹配成功
-				left := i - cur.len + 1
+				left := i - fail.len + 1
 				fillBitMap(bitMap, left, i, true)
 				words = append(words, string(rs[left:i+1]))
 			}
