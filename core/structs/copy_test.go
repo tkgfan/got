@@ -140,24 +140,22 @@ func TestCopyFields(t *testing.T) {
 		},
 	}
 
-	executeTests(tests, t)
-}
-
-func executeTests(tests []copyFieldsTest, t *testing.T) {
-	for _, test := range tests {
-		err := CopyFields(test.dst, test.src)
-		if test.hasError {
-			if err == nil {
-				t.Errorf("%s ,需要抛出异常", test.name)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := CopyFields(tt.dst, tt.src)
+			if tt.hasError {
+				if err == nil {
+					t.Errorf("%s ,需要抛出异常", tt.name)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("%s , %+v", tt.name, err)
+				}
+				if !reflect.DeepEqual(tt.expect, tt.dst) {
+					t.Errorf("%s , expect=%+v, got=%+v", tt.name, tt.expect, tt.dst)
+				}
 			}
-		} else {
-			if err != nil {
-				t.Errorf("%s , %+v", test.name, err)
-			}
-			if !reflect.DeepEqual(test.expect, test.dst) {
-				t.Errorf("%s , expect=%+v, got=%+v", test.name, test.expect, test.dst)
-			}
-		}
+		})
 	}
 }
 
