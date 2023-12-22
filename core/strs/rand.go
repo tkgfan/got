@@ -1,6 +1,6 @@
 // author gmfan
 // date 2023/2/25
-package strings
+package strs
 
 import (
 	"crypto/rand"

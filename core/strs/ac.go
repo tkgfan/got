@@ -1,7 +1,7 @@
 // author gmfan
 // date 2023/3/27
 
-package strings
+package strs
 
 type (
 	// AC 使用 UTF-8 编码

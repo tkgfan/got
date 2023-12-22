@@ -1,7 +1,7 @@
 // author lby
 // date 2023/3/29
 
-package strings
+package strs
 
 import (
 	"reflect"

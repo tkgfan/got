@@ -3,7 +3,6 @@
 package logx
 
 import (
-	"github.com/tkgfan/got/core/strings"
 	"time"
 )
 
@@ -41,7 +40,7 @@ type (
 
 func NewTraceLog() *TraceLog {
 	return &TraceLog{
-		ID:    strings.Rand(16),
+		ID:    strs.Rand(16),
 		Start: time.Now().UnixMilli(),
 		Logs:  make([]*Log, 0),
 	}

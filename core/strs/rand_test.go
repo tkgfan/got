@@ -1,6 +1,6 @@
 // author gmfan
 // date 2023/2/25
-package strings
+package strs
 
 import (
 	"testing"
@@ -20,11 +20,17 @@ func TestRand(t *testing.T) {
 	}
 }
 
-//goos: windows
-//goarch: amd64
-//cpu: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz
-//BenchmarkRand
-//BenchmarkRand-8          1594503               638.5 ns/op
+// goos: windows
+// goarch: amd64
+// cpu: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz
+// BenchmarkRand
+// BenchmarkRand-8          1594503               638.5 ns/op
+//
+// goos: darwin
+// goarch: arm64
+// cpu: Mac M1
+// BenchmarkRand
+// BenchmarkRand-8   	 2255091	       517.7 ns/op
 func BenchmarkRand(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Rand(18)
