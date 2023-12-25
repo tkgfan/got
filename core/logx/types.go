@@ -3,6 +3,7 @@
 package logx
 
 import (
+	"github.com/tkgfan/got/core/strs"
 	"time"
 )
 
