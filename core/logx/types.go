@@ -32,7 +32,7 @@ type (
 
 	Log struct {
 		// 用户 IP
-		IP string `json:"ip"`
+		IP string `json:"ip,omitempty"`
 		// 时间戳为毫秒
 		Start int64 `json:"start"`
 		// 资源，可以是 URL 路径
