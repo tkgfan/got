@@ -18,16 +18,21 @@ type (
 	// TraceLog 链路追踪日志模型
 	TraceLog struct {
 		ID string `json:"id"`
+		// 用户 IP
+		IP string `json:"ip"`
 		// 时间戳为毫秒
 		Start int64 `json:"start"`
 		// 资源，可以是 URL 路径
 		Source string `json:"source"`
 		// 花费时长，此值会自动更新
 		Expensive int64  `json:"expensive"`
+		HasErr    int8   `json:"hasErr"`
 		Logs      []*Log `json:"logs"`
 	}
 
 	Log struct {
+		// 用户 IP
+		IP string `json:"ip"`
 		// 时间戳为毫秒
 		Start int64 `json:"start"`
 		// 资源，可以是 URL 路径

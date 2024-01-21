@@ -5,7 +5,6 @@ package logx
 import (
 	"context"
 	"encoding/json"
-	"github.com/tkgfan/got/core/errors"
 	"github.com/tkgfan/got/core/structs"
 )
 
@@ -96,8 +95,9 @@ func TraceLogMergeLog(ctx context.Context, err error) {
 	tl := GetTraceLog(ctx)
 	curLog := ctx.Value(LogKey).(*Log)
 	if !structs.IsNil(err) {
-		curLog.Info = errors.Json(err)
+		curLog.Info = err
 		curLog.Status = StatusErr
+		tl.HasErr = StatusErr
 	}
 	tl.AddLog(curLog)
 }

@@ -117,30 +117,3 @@ func TestWrapf(t *testing.T) {
 		}
 	}
 }
-
-func TestJson(t *testing.T) {
-	st := New("implemented Jsoner interface")
-	tests := []struct {
-		name string
-		err  error
-		want string
-	}{
-		{
-			name: "自定义实现了 Json 方法",
-			err:  st,
-			want: st.(Jsoner).Json(),
-		},
-		{
-			name: "没有实现 Json 方法",
-			err:  stderrors.New("not implemented Jsoner interface"),
-			want: `{"cause":"not implemented Jsoner interface"}`,
-		},
-	}
-
-	for _, tt := range tests {
-		got := Json(tt.err)
-		if got != tt.want {
-			t.Errorf("Json(): name: %q, got: %q, want: %q", tt.name, got, tt.want)
-		}
-	}
-}
