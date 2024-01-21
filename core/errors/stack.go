@@ -4,6 +4,7 @@
 package errors
 
 import (
+	"encoding/json"
 	stderrors "errors"
 	"runtime"
 )
@@ -28,6 +29,18 @@ func caller(remark string) *stack {
 type stackError struct {
 	Cause  error    `json:"cause"`
 	Stacks []*stack `json:"stacks"`
+}
+
+func (s *stackError) MarshalJSON() ([]byte, error) {
+	cause := ""
+	if s.Cause != nil {
+		cause = s.Cause.Error()
+	}
+	m := map[string]any{
+		"cause":  cause,
+		"stacks": s.Stacks,
+	}
+	return json.Marshal(m)
 }
 
 // New 创建一个包含堆栈信息的 error
