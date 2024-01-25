@@ -54,9 +54,9 @@ func TestNewFixedPool(t *testing.T) {
 					t.Error(err)
 					return
 				}
-				if pool.size != tt.expectSize || pool.policy != tt.expectPolicy {
+				if pool.size != tt.expectSize || pool.GetDefaultPolicy() != tt.expectPolicy {
 					t.Errorf("got: size=%d,policy=%d expect: size=%d,policy=%d",
-						pool.size, pool.policy, tt.expectSize, tt.expectPolicy)
+						pool.size, pool.GetDefaultPolicy(), tt.expectSize, tt.expectPolicy)
 				}
 			}
 		})
@@ -102,7 +102,7 @@ func TestFixedPool_Execute(t *testing.T) {
 			}
 			t1 := time.Now().Unix()
 			for i := 0; i < tt.tasks; i++ {
-				pool.Execute(taskFn)
+				pool.Submit(taskFn)
 			}
 			t2 := time.Now().Unix()
 			res := t2 - t1
@@ -126,7 +126,7 @@ func BenchmarkFixedPool_Execute(b *testing.B) {
 		b.Error(err)
 	}
 	for i := 0; i < b.N; i++ {
-		pool.Execute(func() {
+		pool.Submit(func() {
 
 		})
 	}
