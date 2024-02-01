@@ -5,31 +5,51 @@
 package structs
 
 import (
-	"errors"
 	"reflect"
 )
 
 // CopyFields 复制结构体 src 到 dst 中，会尽可能复制名称相同的字段。
 // 如果 src 为切片或数组，则 dst 必须也为切片或数组。需要注意的是 dst
 // 必须为指针类型
-func CopyFields(dst, src any) (err error) {
-	// dst 与 src 为数组或切片
-	if isArrOrSlice, e := typeCheck(dst, src); isArrOrSlice || e != nil {
-		if isArrOrSlice && e == nil {
-			e = copyArrayOrSlice(dst, src)
-		}
+func CopyFields(dst, src any) {
+	copyCheck(dst, src)
 
-		return e
+	if isArrOrSlice(dst) {
+		// dst 为数组或切片
+		copyArrayOrSlice(dst, src)
+		return
 	}
 
 	srcVal := reflect.ValueOf(src)
 	dstVal := reflect.ValueOf(dst)
 
-	return copyValue(dstVal, srcVal)
+	copyValue(dstVal, srcVal)
+}
+
+// 检查 dst 与 src 是否能进行复制，若不能复制则会 panic
+func copyCheck(dst, src any) {
+	// dst 必须为指针类型
+	dstType := reflect.ValueOf(dst)
+	if dstType.Kind() != reflect.Pointer {
+		panic("dst 必须为 Pointer")
+	}
+
+	dstType = dstType.Elem()
+	srcType := reflect.TypeOf(src)
+
+	dstKind := dstType.Kind()
+	srcKind := srcType.Kind()
+
+	// src 为数组或切片
+	if srcKind == reflect.Array || srcKind == reflect.Slice {
+		if dstKind != reflect.Array && dstKind != reflect.Slice {
+			panic("src 为数组或切片，dst 也必须是数组或切片")
+		}
+	}
 }
 
 // 复制数组与切片
-func copyArrayOrSlice(dst, src any) (err error) {
+func copyArrayOrSlice(dst, src any) {
 	dstValRes := reflect.ValueOf(dst)
 	dstVal := elemIfPointer(dstValRes)
 	srcVal := elemIfPointer(reflect.ValueOf(src))
@@ -43,9 +63,7 @@ func copyArrayOrSlice(dst, src any) (err error) {
 			dstVal = reflect.Append(dstVal, newElem)
 		}
 
-		if err = copyValue(dstVal.Index(i), srcVal.Index(i)); err != nil {
-			return
-		}
+		copyValue(dstVal.Index(i), srcVal.Index(i))
 	}
 
 	if dstVal.Kind() == reflect.Array {
@@ -57,22 +75,22 @@ func copyArrayOrSlice(dst, src any) (err error) {
 }
 
 // 复制src的值到dst
-func copyValue(dst, src reflect.Value) (err error) {
+func copyValue(dst, src reflect.Value) {
 	dst = elemIfPointer(dst)
 	src = elemIfPointer(src)
 
 	// 接口可以直接赋值
 	if dst.Kind() == reflect.Interface {
 		dst.Set(src)
-		return nil
+		return
 	}
 
 	if dst.Kind() != reflect.Struct {
-		return errors.New("dst 不为结构体")
+		panic("dst 不为结构体")
 	}
 
 	if src.Kind() != reflect.Struct {
-		return errors.New("src不为结构体")
+		panic("src不为结构体")
 	}
 
 	srcType := src.Type()
@@ -82,7 +100,7 @@ func copyValue(dst, src reflect.Value) (err error) {
 		if ok := df.IsValid(); !ok {
 			// stf 可能是匿名结构体
 			if stf.Type.Kind() == reflect.Struct {
-				err = copyValue(dst, src.Field(i))
+				copyValue(dst, src.Field(i))
 			}
 			continue
 		}
@@ -103,41 +121,18 @@ func copyValue(dst, src reflect.Value) (err error) {
 
 		df.Set(src.Field(i))
 	}
-
-	return nil
 }
 
-// 类型检查，如果 dst 与 src 都为数组或切片则 isArrOrSlice 为 true。
-// 如果两个类型不可复制则抛出异常
-func typeCheck(dst, src any) (isArrOrSlice bool, err error) {
-	// dst 必须为指针类型
+// 类型检查，如果 dst 为数组或切片则返回 true。
+func isArrOrSlice(dst any) bool {
 	dstType := reflect.ValueOf(dst)
-	if dstType.Kind() != reflect.Pointer {
-		return false, errors.New("dst 必须为 Pointer")
-	}
-
 	dstType = dstType.Elem()
-	srcType := reflect.TypeOf(src)
-
 	dstKind := dstType.Kind()
-	srcKind := srcType.Kind()
-
-	// src 为数组或切片
-	if srcKind == reflect.Array || srcKind == reflect.Slice {
-		if dstKind != reflect.Array && dstKind != reflect.Slice {
-			return false, errors.New("src 为数组或切片，dst 也必须是数组或切片")
-		}
-
-		if dstType.Kind() == reflect.Array {
-			srcVal := elemIfPointer(reflect.ValueOf(src))
-			if dstType.Len() < srcVal.Len() {
-				return true, errors.New("dst 为数组时长度必须大于等于 src 的长度")
-			}
-		}
-		return true, nil
+	if dstKind == reflect.Array || dstKind == reflect.Slice {
+		// dst 为数组或切片
+		return true
 	}
-
-	return false, nil
+	return false
 }
 
 // 如果v是Pointer则返回其指向的值
