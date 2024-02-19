@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v1.1.6 2024/02/19
+
+- 增加
+  - dsl
+- 修改
+  - structs.CopyFields 抛出 error 改 panic
+  - 升级 go 版本
+
 ## v1.1.5 2024/01/29
 
 - 增加
