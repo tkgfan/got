@@ -70,7 +70,7 @@ func TestWrap(t *testing.T) {
 	for _, tt := range tests {
 		got := Wrap(tt.err)
 		if got == nil || tt.want == nil {
-			if got != tt.want {
+			if !Is(got, tt.want) {
 				t.Errorf("Wrap(): name: %s, got: %v, want: %v", tt.name, got, tt.want)
 			}
 			continue
@@ -107,7 +107,7 @@ func TestWrapf(t *testing.T) {
 	for _, tt := range tests {
 		got := Wrapf(tt.err, "")
 		if got == nil || tt.want == nil {
-			if got != tt.want {
+			if !Is(got, tt.want) {
 				t.Errorf("Wrap(): name: %s, got: %v, want: %v", tt.name, got, tt.want)
 			}
 			continue

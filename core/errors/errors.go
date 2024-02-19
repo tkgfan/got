@@ -11,7 +11,8 @@ import (
 // Cause 返回由 errors.New、errors.Wrap、errors.Wrapf 中包裹的 Cause error。
 // error 如果不是上述方法产生的则会返回其本身
 func Cause(err error) error {
-	if e, ok := err.(*stackError); ok {
+	var e *stackError
+	if As(err, &e) {
 		return e.Cause
 	}
 	return err
@@ -22,7 +23,8 @@ func Wrap(err error) error {
 	if structs.IsNil(err) {
 		return nil
 	}
-	if se, ok := err.(*stackError); ok {
+	var se *stackError
+	if As(err, &se) {
 		se.Stacks = append(se.Stacks, caller(""))
 		return se
 	}
@@ -39,7 +41,8 @@ func Wrapf(err error, format string, args ...any) error {
 	}
 
 	remark := fmt.Sprintf(format, args...)
-	if st, ok := err.(*stackError); ok {
+	var st *stackError
+	if As(err, &st) {
 		st.Stacks = append(st.Stacks, caller(remark))
 		return st
 	}

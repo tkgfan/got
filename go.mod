@@ -1,6 +1,6 @@
 module github.com/tkgfan/got
 
-go 1.19
+go 1.22
 
 require (
 	github.com/redis/go-redis/v9 v9.0.5

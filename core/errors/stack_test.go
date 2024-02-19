@@ -34,7 +34,8 @@ func TestIsStackError(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		_, got := tt.err.(*stackError)
+		var stackError *stackError
+		got := As(tt.err, &stackError)
 		if got != tt.want {
 			t.Errorf("IsStackError(): name: %s, got: %v, want: %v", tt.name, got, tt.want)
 		}
