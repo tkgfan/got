@@ -37,6 +37,13 @@ func TestAC_FindFirst(t *testing.T) {
 			expectWord:  "蜜蜂",
 			expectIndex: 3,
 		},
+		{
+			name:        "特殊字符-1",
+			words:       []string{"OS-A & AKR"},
+			text:        "OS-A & AKR",
+			expectWord:  "OS-A & AKR",
+			expectIndex: 0,
+		},
 	}
 
 	for _, tt := range tests {
