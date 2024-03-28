@@ -1,9 +1,10 @@
 // author lby
 // date 2023/2/24
 
-package errors
+package errs
 
 import (
+	"errors"
 	"fmt"
 	"github.com/tkgfan/got/core/structs"
 )
@@ -12,7 +13,7 @@ import (
 // error 如果不是上述方法产生的则会返回其本身
 func Cause(err error) error {
 	var e *stackError
-	if As(err, &e) {
+	if errors.As(err, &e) {
 		return e.Cause
 	}
 	return err
@@ -24,7 +25,7 @@ func Wrap(err error) error {
 		return nil
 	}
 	var se *stackError
-	if As(err, &se) {
+	if errors.As(err, &se) {
 		se.Stacks = append(se.Stacks, caller(""))
 		return se
 	}
@@ -42,7 +43,7 @@ func Wrapf(err error, format string, args ...any) error {
 
 	remark := fmt.Sprintf(format, args...)
 	var st *stackError
-	if As(err, &st) {
+	if errors.As(err, &st) {
 		st.Stacks = append(st.Stacks, caller(remark))
 		return st
 	}

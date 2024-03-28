@@ -5,7 +5,7 @@ package mongos
 
 import (
 	"context"
-	"github.com/tkgfan/got/core/errors"
+	"github.com/tkgfan/got/core/errs"
 	"github.com/tkgfan/got/core/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -69,10 +69,10 @@ func UpsertMany(ctx context.Context, table string, filters []bson.D,
 
 	// 数据格式效验
 	if upVal.Kind() != reflect.Slice && upVal.Kind() != reflect.Array {
-		err = errors.New("updates必须为数组或切片")
+		err = errs.New("updates必须为数组或切片")
 		return
 	} else if upVal.Len() != len(filters) {
-		err = errors.New("filters与updates长度必须一致")
+		err = errs.New("filters与updates长度必须一致")
 		return
 	}
 
@@ -184,36 +184,29 @@ func handlerPage(opts *options.FindOptions, page *model.Page) {
 	}
 }
 
-type nextInt64 struct {
-	ID        string `bson:"_id"`
-	NextInt64 int64  `bson:"next_int64"`
+type autoIncIDModule struct {
+	ID  string `bson:"_id"`
+	Val int64  `bson:"val"`
 }
 
-// GetNextInt64 获取集合的自增值，此操作同时会更新集合的自增值。给定集合如果不存在
-// _id 为 next_int64 则会自动创建如下文档:
-//
-//	{
-//		"_id":"next_int64",
-//		"next_int64":1
-//	}
-//
-// 则会抛出异常
-func GetNextInt64(ctx context.Context, table string) (nextInt int64, err error) {
-	filter := bson.D{{"_id", "next_int64"}}
-	update := bson.D{{"$inc", bson.M{"next_int64": 1}}}
-	var res nextInt64
-	upsert := true
-	err = DB().Collection(table).FindOneAndUpdate(ctx, filter, update, &options.FindOneAndUpdateOptions{
-		Upsert: &upsert,
-	}).Decode(&res)
-	// 自动创建
-	if err == mongo.ErrNoDocuments {
-		err = nil
-		return 1, nil
+// AutoIncID 获取自增 ID，key 为自增键。
+func AutoIncID(ctx context.Context, table string, key string) (int64, error) {
+	filter := bson.D{{"_id", key}}
+	update := bson.D{{"$inc", bson.M{"val": 1}}}
+	var res autoIncIDModule
+	opts := &options.FindOneAndUpdateOptions{}
+	opts.SetReturnDocument(options.After)
+	opts.SetUpsert(true)
+	err := DB().Collection(table).FindOneAndUpdate(ctx, filter, update, opts).Decode(&res)
+	for err != nil && IsDuplicateKeyErr(err) {
+		// 并发冲突，继续尝试获取自增 ID
+		err = DB().Collection(table).FindOneAndUpdate(ctx, filter, update, opts).Decode(&res)
+		if err == nil {
+			return res.Val, nil
+		}
 	}
 	if err != nil {
-		return nextInt, err
+		return -1, errs.Wrap(err)
 	}
-	nextInt = res.NextInt64 + 1
-	return
+	return res.Val, nil
 }

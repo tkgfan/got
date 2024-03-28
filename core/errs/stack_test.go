@@ -1,11 +1,11 @@
 // Package errors
 // author gmfan
 // date 2023/2/24
-package errors
+package errs
 
 import (
 	"encoding/json"
-	stderrors "errors"
+	"errors"
 	"github.com/tkgfan/got/core/testx"
 	"testing"
 )
@@ -23,7 +23,7 @@ func TestIsStackError(t *testing.T) {
 		},
 		{
 			name: "普通 error",
-			err:  stderrors.New("test"),
+			err:  errors.New("test"),
 			want: false,
 		},
 		{
@@ -35,7 +35,7 @@ func TestIsStackError(t *testing.T) {
 
 	for _, tt := range tests {
 		var stackError *stackError
-		got := As(tt.err, &stackError)
+		got := errors.As(tt.err, &stackError)
 		if got != tt.want {
 			t.Errorf("IsStackError(): name: %s, got: %v, want: %v", tt.name, got, tt.want)
 		}
@@ -52,7 +52,7 @@ func TestStackError_MarshalJSON(t *testing.T) {
 		{
 			name: "普通测试",
 			arg: &stackError{
-				Cause:  stderrors.New("normal error"),
+				Cause:  errors.New("normal error"),
 				Stacks: []*stack{},
 			},
 			expect: `{"cause":"normal error","stacks":[]}`,

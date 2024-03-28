@@ -1,10 +1,10 @@
 // Package errors
 // author gmfan
 // date 2023/2/25
-package errors
+package errs
 
 import (
-	stderrors "errors"
+	"errors"
 	"testing"
 )
 
@@ -16,23 +16,23 @@ func TestCause(t *testing.T) {
 	}{
 		{
 			name: "普通 error",
-			err:  stderrors.New("t1"),
-			want: stderrors.New("t1"),
+			err:  errors.New("t1"),
+			want: errors.New("t1"),
 		},
 		{
 			name: "errors.New",
 			err:  New("errors.New"),
-			want: stderrors.New("errors.New"),
+			want: errors.New("errors.New"),
 		},
 		{
 			name: "errors.Wrap",
-			err:  Wrap(stderrors.New("errors.Wrap")),
-			want: stderrors.New("errors.Wrap"),
+			err:  Wrap(errors.New("errors.Wrap")),
+			want: errors.New("errors.Wrap"),
 		},
 		{
 			name: "errors.Wrapf",
-			err:  Wrapf(stderrors.New("errors.Wrapf"), "format"),
-			want: stderrors.New("errors.Wrapf"),
+			err:  Wrapf(errors.New("errors.Wrapf"), "format"),
+			want: errors.New("errors.Wrapf"),
 		},
 	}
 
@@ -57,8 +57,8 @@ func TestWrap(t *testing.T) {
 		},
 		{
 			name: "普通 error",
-			err:  stderrors.New("foo"),
-			want: stderrors.New("foo"),
+			err:  errors.New("foo"),
+			want: errors.New("foo"),
 		},
 		{
 			name: "stackError",
@@ -70,7 +70,7 @@ func TestWrap(t *testing.T) {
 	for _, tt := range tests {
 		got := Wrap(tt.err)
 		if got == nil || tt.want == nil {
-			if !Is(got, tt.want) {
+			if !errors.Is(got, tt.want) {
 				t.Errorf("Wrap(): name: %s, got: %v, want: %v", tt.name, got, tt.want)
 			}
 			continue
@@ -94,8 +94,8 @@ func TestWrapf(t *testing.T) {
 		},
 		{
 			name: "普通 error",
-			err:  stderrors.New("foo"),
-			want: stderrors.New("foo"),
+			err:  errors.New("foo"),
+			want: errors.New("foo"),
 		},
 		{
 			name: "stackError",
@@ -107,7 +107,7 @@ func TestWrapf(t *testing.T) {
 	for _, tt := range tests {
 		got := Wrapf(tt.err, "")
 		if got == nil || tt.want == nil {
-			if !Is(got, tt.want) {
+			if !errors.Is(got, tt.want) {
 				t.Errorf("Wrap(): name: %s, got: %v, want: %v", tt.name, got, tt.want)
 			}
 			continue

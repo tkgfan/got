@@ -18,7 +18,7 @@ go get github.com/tkgfan/got
   - IsNil(val any) bool: 判断 val 是否为 nil。
 - slices
   - ToInterfaceSlice(val any) (res []any): 将 val 转换为 interface 切片。
-- errors
+- errs
   - New(msg string) error: 创建一个包含堆栈信息的 error。
   - Wrap(err error) error: 返回包含栈信息的 error。
   - Wrapf(err error, format string, args ...any) error: 返回包含栈信息的 error。

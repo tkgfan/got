@@ -4,7 +4,6 @@
 package concurrent
 
 import (
-	"github.com/tkgfan/got/core/errors"
 	"sync/atomic"
 	"time"
 )
@@ -106,7 +105,7 @@ func (f *fixedPool) setPolicy(policy int) error {
 	if policyCheck(policy) {
 		f.defaultPolicy = policy
 	} else {
-		return errors.New("不支持此策略")
+		return errs.New("不支持此策略")
 	}
 	return nil
 }

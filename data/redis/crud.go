@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/redis/go-redis/v9"
-	"github.com/tkgfan/got/core/errors"
 	"time"
 )
 
@@ -19,12 +18,12 @@ func Set(ctx context.Context, key string, value any, expire int64) (err error) {
 	// 序列化
 	bs, err := json.Marshal(value)
 	if err != nil {
-		return errors.Wrapf(err, string(bs))
+		return errs.Wrapf(err, string(bs))
 	}
 
 	err = Client().Set(ctx, key, bs, time.Duration(expire)*time.Second).Err()
 	if err != nil {
-		return errors.Wrapf(err, string(bs))
+		return errs.Wrapf(err, string(bs))
 	}
 	return
 }
@@ -39,7 +38,7 @@ func Get(ctx context.Context, key string, res any) (err error) {
 
 	err = json.Unmarshal([]byte(val), res)
 	if err != nil {
-		return errors.Wrapf(err, val)
+		return errs.Wrapf(err, val)
 	}
 	return
 }
@@ -48,7 +47,7 @@ func Get(ctx context.Context, key string, res any) (err error) {
 func Del(ctx context.Context, keys ...string) (err error) {
 	err = Client().Del(ctx, keys...).Err()
 	if err != nil {
-		return errors.Wrapf(err, "keys=%+v", keys)
+		return errs.Wrapf(err, "keys=%+v", keys)
 	}
 	return
 }

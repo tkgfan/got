@@ -1,7 +1,7 @@
 // author lby
 // date 2023/2/24
 
-package errors
+package errs
 
 import (
 	"encoding/json"
