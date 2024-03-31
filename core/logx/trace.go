@@ -81,7 +81,7 @@ func tracePrint(ctx context.Context, level string, logInfo any) {
 		// 不需要染色
 		outStr = TraceLogFormat(log)
 	}
-	_, err := TraceOut.WriteString(outStr + "\n")
+	_, err := TraceOut.Write([]byte(outStr + "\n"))
 	if err != nil {
 		Error(err)
 	}

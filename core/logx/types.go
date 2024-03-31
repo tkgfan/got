@@ -6,11 +6,13 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/tkgfan/got/core/strs"
+	"io"
 	"os"
 	"time"
 )
 
-var TraceOut = os.Stdout
+// TraceOut 链路日志输出，可自定义
+var TraceOut io.Writer = os.Stdout
 
 // 日志级别
 const (
