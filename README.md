@@ -2,15 +2,17 @@
 
 > go tool
 
-提供常用的 SDK
+go 常用工具库。
 
-## Installation
+## 安装
 
 ```bash
 go get github.com/tkgfan/got
 ```
 
-## core
+## 简要说明
+
+### core
 
 此文件加下的函数不依赖于第三方库，简要说明：
 - structs
@@ -31,7 +33,7 @@ go get github.com/tkgfan/got
 - dsl：可用于快速构建 ElasticSearch、ZincSearch 查询条件语句。
 - env：环境变量工具。
 
-## data
+### data
 
 此文件夹下为与数据库相关的工具。简要介绍：
 - mongos：mongo 工具。
