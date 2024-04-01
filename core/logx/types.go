@@ -58,6 +58,7 @@ var TraceLogFormat TraceLogFormatFunc = func(log *TraceLog) string {
 	entry := make(map[string]any)
 	entry["tid"] = log.Tid
 	entry["start"] = log.Start.UnixMilli()
+	entry["ip"] = log.Ip
 	entry["source"] = log.Source
 	entry["level"] = log.Level
 	entry["duration"] = time.Now().UnixMilli() - log.Start.UnixMilli()
