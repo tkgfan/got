@@ -60,7 +60,7 @@ var TraceLogFormat TraceLogFormatFunc = func(log *TraceLog) string {
 	entry["start"] = log.Start.UnixMilli()
 	entry["source"] = log.Source
 	entry["level"] = log.Level
-	entry["duration"] = log.Start.UnixMilli() - time.Now().UnixMilli()
+	entry["duration"] = time.Now().UnixMilli() - log.Start.UnixMilli()
 	entry["info"] = log.Info
 	bs, err := json.Marshal(entry)
 	if err != nil {
@@ -73,7 +73,9 @@ var TraceLogFormat TraceLogFormatFunc = func(log *TraceLog) string {
 type (
 	// TraceCtx 链路日志上下文
 	TraceCtx struct {
-		Tid   string    `json:"tid"`
+		Tid string `json:"tid"`
+		// 用户 IP
+		Ip    string    `json:"ip"`
 		Start time.Time `json:"start"`
 		// 请求资源，可以是 URL 路径
 		Source string `json:"source"`
@@ -81,6 +83,7 @@ type (
 
 	TraceLog struct {
 		Tid   string    `json:"tid"`
+		Ip    string    `json:"ip"`
 		Start time.Time `json:"start"`
 		// 请求资源，可以是 URL 路径
 		Source   string `json:"source"`
@@ -93,20 +96,24 @@ type (
 	TraceLogFormatFunc func(log *TraceLog) string
 )
 
-func NewTraceCtx(source string) *TraceCtx {
+func NewTraceCtx(tid, ip, source string) *TraceCtx {
+	if tid == "" {
+		tid = strs.Rand(16)
+	}
 	return &TraceCtx{
-		Tid:    strs.Rand(16),
+		Tid:    tid,
+		Ip:     ip,
 		Start:  time.Now(),
 		Source: source,
 	}
 }
 
 // SetTraceCtx 设置链路日志上下文
-func SetTraceCtx(ctx context.Context, source string) context.Context {
+func SetTraceCtx(ctx context.Context, tid, ip, source string) context.Context {
 	if ctx == nil {
 		return nil
 	}
-	return context.WithValue(ctx, TraceCtxKey, NewTraceCtx(source))
+	return context.WithValue(ctx, TraceCtxKey, NewTraceCtx(tid, ip, source))
 }
 
 // GetTraceCtx 获取链路日志上下文，不存在则会自动创建一个
@@ -117,5 +124,5 @@ func GetTraceCtx(ctx context.Context) *TraceCtx {
 	if v, ok := ctx.Value(TraceCtxKey).(*TraceCtx); ok {
 		return v
 	}
-	return NewTraceCtx("")
+	return NewTraceCtx("", "", "")
 }
