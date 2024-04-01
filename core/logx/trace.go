@@ -5,6 +5,7 @@ package logx
 import (
 	"context"
 	"fmt"
+	"github.com/tkgfan/got/core/structs"
 )
 
 func TraceInfo(ctx context.Context, v ...any) {
@@ -67,12 +68,10 @@ func tracePrint(ctx context.Context, level string, logInfo any) {
 	// 提取上下文
 	tc := GetTraceCtx(ctx)
 	log := &TraceLog{
-		Tid:    tc.Tid,
-		Start:  tc.Start,
-		Source: tc.Source,
-		Level:  level,
-		Info:   logInfo,
+		Level: level,
+		Info:  logInfo,
 	}
+	structs.CopyFields(log, tc)
 	var outStr string
 	if levelToInt(level) > levelToInt(InfoLevel) {
 		// 需要染色
