@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/redis/go-redis/v9"
+	"github.com/tkgfan/got/core/errs"
 	"time"
 )
 
