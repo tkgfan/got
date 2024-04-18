@@ -32,6 +32,7 @@ go get github.com/tkgfan/got
 - concurrent：并发工具。
 - dsl：可用于快速构建 ElasticSearch、ZincSearch 查询条件语句。
 - env：环境变量工具。
+- fs: 文件工具
 
 ### data
 
