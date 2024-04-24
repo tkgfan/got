@@ -5,7 +5,9 @@ package logx
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/tkgfan/got/core/strs"
+	"github.com/tkgfan/got/core/structs"
 	"io"
 	"os"
 	"time"
@@ -62,7 +64,26 @@ var TraceLogFormat TraceLogFormatFunc = func(log *TraceLog) string {
 	entry["source"] = log.Source
 	entry["level"] = log.Level
 	entry["duration"] = time.Now().UnixMilli() - log.Start.UnixMilli()
-	entry["info"] = log.Info
+
+	// 处理 info 数组
+	switch log.Info.(type) {
+	case []interface{}:
+		arr := log.Info.([]interface{})
+		var infos []any
+		for i := 0; i < len(arr); i++ {
+			info := arr[i]
+			if structs.IsSerializable(info) {
+				infos = append(infos, info)
+			} else {
+				infos = append(infos, fmt.Sprint(info))
+			}
+		}
+		entry["info"] = infos
+	default:
+		entry["info"] = log.Info
+	}
+
+	// 执行序列化
 	bs, err := json.Marshal(entry)
 	if err != nil {
 		Error(err)

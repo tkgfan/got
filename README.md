@@ -18,6 +18,8 @@ go get github.com/tkgfan/got
 - structs
   - CopyFields(dst, src any) (err error): 将 src 上的字段复制到 dst 上。
   - IsNil(val any) bool: 判断 val 是否为 nil。
+  - IsSerializable(val any): 判断 val 是否可序列化。
+  - IsBasicType(val any): 判断 val 是否为基本类型。
 - slices
   - ToInterfaceSlice(val any) (res []any): 将 val 转换为 interface 切片。
 - errs
