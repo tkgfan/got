@@ -9,8 +9,8 @@ import (
 	"os"
 )
 
-// SaveJson 保存 JSON 对象到文件中
-func SaveJson(fileName string, data any) (err error) {
+// SaveJSON 保存 JSON 对象到文件中
+func SaveJSON(fileName string, data any) (err error) {
 	bs, err := json.Marshal(data)
 	if err != nil {
 		return
