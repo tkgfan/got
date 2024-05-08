@@ -45,7 +45,8 @@ func (t DSL) Push(value any, positions ...string) DSL {
 // GetDSL 获取指定位置的 DSL ，如果位置不存在则会创建 DSL
 func (t DSL) GetDSL(positions ...string) DSL {
 	res := t
-	for _, p := range positions {
+	for i := 0; i < len(positions)-1; i++ {
+		p := positions[i]
 		if _, ok := res[p]; !ok {
 			res[p] = New()
 		}
@@ -56,12 +57,7 @@ func (t DSL) GetDSL(positions ...string) DSL {
 
 // PushToArray 添加一个元素至数组中，指定位置不存在则会自动创建 any 类型数组
 func (t DSL) PushToArray(element any, positions ...string) DSL {
-	if len(positions) == 1 {
-		t[positions[0]] = element
-		return t
-	}
-
-	m := t.GetDSL(positions[:len(positions)-1]...)
+	m := t.GetDSL(positions...)
 	end := positions[len(positions)-1]
 	if _, ok := m[end]; !ok {
 		m[end] = make([]any, 0)
