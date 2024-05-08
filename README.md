@@ -1,8 +1,6 @@
 # got
 
-> go tool
-
-go 常用工具库。
+> go 常用工具库。
 
 ## 安装
 
@@ -35,6 +33,7 @@ go get github.com/tkgfan/got
 - dsl：可用于快速构建 ElasticSearch、ZincSearch 查询条件语句。
 - env：环境变量工具。
 - fs: 文件工具
+- maths：数学工具。
 
 ### data
 
