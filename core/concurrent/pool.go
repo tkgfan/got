@@ -4,6 +4,7 @@
 package concurrent
 
 import (
+	"github.com/tkgfan/got/core/errs"
 	"sync/atomic"
 	"time"
 )
@@ -78,7 +79,7 @@ func (f *fixedPool) SubmitUsePolicy(fn func(), policy int) {
 	// 没有成功加入任务需要移除加入操作
 	atomic.AddInt64(f.curSize, -1)
 
-	// 达到并发上线，按照具体策略来处理任务
+	// 达到并发上限，按照具体策略来处理任务
 	switch policy {
 	case BlockPolicy:
 		f.blockHandle(fn)
