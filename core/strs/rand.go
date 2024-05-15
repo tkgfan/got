@@ -4,9 +4,7 @@ package strs
 
 import (
 	"crypto/rand"
-	"fmt"
 	"io"
-	math_rand "math/rand"
 )
 
 const CharacterSequence = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
@@ -28,15 +26,4 @@ func Rand(len int) string {
 		bs[i] = CharacterSequence[ridx[i]%N]
 	}
 	return string(bs)
-}
-
-// RandomUA 生成随机 UA 字符串
-func RandomUA() string {
-	ua := fmt.Sprintf("AppleWebKit/%d.%d  (KHTML, like Gecko) Chrome/69.0.%d.%d",
-		math_rand.Intn(100)+500, math_rand.Intn(100)+1, math_rand.Intn(500)+3000, math_rand.Intn(100)+1)
-	ua = fmt.Sprintf(" Safari/%d.%d %s",
-		math_rand.Intn(100)+500, math_rand.Intn(100)+1, ua)
-	ua = fmt.Sprintf("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_1%d_%d) %s",
-		math_rand.Intn(3)+3, math_rand.Intn(7)+1, ua)
-	return ua
 }

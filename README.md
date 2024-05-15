@@ -34,6 +34,8 @@ go get github.com/tkgfan/got
 - env：环境变量工具。
 - fs: 文件工具
 - maths：数学工具。
+- spider
+  - HttpSpider: 基于 HTTP 协议的爬虫工具，此 spider 会存储 cookie 上下文。（不会运行 JS 代码性能高）
 
 ### data
 
