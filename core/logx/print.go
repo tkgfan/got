@@ -69,24 +69,7 @@ func Errorf(format string, v ...any) {
 	colorPrint(ErrorLevel, fmt.Sprintf(format, v...))
 }
 
-func Panic(v ...any) {
-	if levelNotPass(PanicLevel) {
-		return
-	}
-	colorPrint(PanicLevel, fmt.Sprint(v...))
-}
-
-func Panicf(format string, v ...any) {
-	if levelNotPass(PanicLevel) {
-		return
-	}
-	colorPrint(PanicLevel, fmt.Sprintf(format, v...))
-}
-
 func colorPrint(level, logStr string) {
-	if level == PanicLevel {
-		log.Panic(red(logStr))
-	}
 	if levelToInt(level) < levelToInt(WarnLevel) {
 		// 普通打印
 		log.Println(logStr)

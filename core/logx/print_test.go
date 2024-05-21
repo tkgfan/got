@@ -16,12 +16,3 @@ func TestInfof(t *testing.T) {
 func TestError(t *testing.T) {
 	Error("output red message")
 }
-
-func TestPanic(t *testing.T) {
-	defer func() {
-		if e := recover(); e == nil {
-			t.Error("error 不应该为 nil")
-		}
-	}()
-	Panic("panic")
-}

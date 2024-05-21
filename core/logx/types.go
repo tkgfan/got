@@ -21,7 +21,6 @@ const (
 	InfoLevel  = "info"
 	WarnLevel  = "warn"
 	ErrorLevel = "error"
-	PanicLevel = "panic"
 )
 
 func levelToInt(level string) int {
@@ -32,8 +31,6 @@ func levelToInt(level string) int {
 		return 1
 	case ErrorLevel:
 		return 2
-	case PanicLevel:
-		return 3
 	default:
 		return -1
 	}

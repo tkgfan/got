@@ -50,20 +50,6 @@ func TraceErrorf(ctx context.Context, format string, v ...any) {
 	tracePrint(ctx, ErrorLevel, fmt.Sprintf(format, v...))
 }
 
-func TracePanic(ctx context.Context, v ...any) {
-	if levelNotPass(PanicLevel) {
-		return
-	}
-	tracePrint(ctx, PanicLevel, v)
-}
-
-func TracePanicf(ctx context.Context, format string, v ...any) {
-	if levelNotPass(PanicLevel) {
-		return
-	}
-	tracePrint(ctx, PanicLevel, fmt.Sprintf(format, v...))
-}
-
 func tracePrint(ctx context.Context, level string, logInfo any) {
 	// 提取上下文
 	tc := GetTraceCtx(ctx)
