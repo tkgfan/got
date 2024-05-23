@@ -28,7 +28,9 @@ go get github.com/tkgfan/got
 - strs
   - Rand(len int) string: 生成随机 token 字符串，len 为 token 长度。
   - WrapByFn：基于 AC 自动机进行模式串匹配并自定义处理模式串。
-- logx：日志工具。
+- tlog：链路日志。
+  - NewTid() string: 创建日志 tid
+  - WithTid(ctx context.Context) context.Context：上下文中设置 tid
 - concurrent：并发工具。
 - dsl：可用于快速构建 ElasticSearch、ZincSearch 查询条件语句。
 - env：环境变量工具。
