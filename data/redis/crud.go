@@ -52,3 +52,31 @@ func Del(ctx context.Context, keys ...string) (err error) {
 	}
 	return
 }
+
+// CountLimit 有效期内限制 key 的数量，并返回剩余数量。每次调用此函数都会增加 key 计数值。
+// maxCount 为计数最大值，duration 为计数周期单位时间秒，remain 是返回剩余次数小于 0 则
+// 表示已经达到上限。
+func CountLimit(ctx context.Context, key string, maxCount int64, duration int64) (remain int64, err error) {
+	// 尝试设置 key 起始值为 1
+	res := Client().SetNX(ctx, key, 1, time.Duration(duration)*time.Second)
+	if err = res.Err(); err != nil {
+		return
+	}
+	if res.Val() {
+		return maxCount - 1, nil
+	}
+
+	// 加一
+	count, err := Client().Incr(ctx, key).Result()
+	if err != nil {
+		return
+	}
+	// key 超时过期
+	if count == 1 {
+		// 重新设置 key
+		err = Client().Set(ctx, key, 1, time.Duration(duration)*time.Second).Err()
+		return maxCount - 1, err
+	}
+
+	return maxCount - count, nil
+}
