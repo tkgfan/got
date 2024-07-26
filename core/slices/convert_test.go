@@ -1,4 +1,4 @@
-// author lby
+// author gmfan
 // date 2023/2/7
 
 package slices

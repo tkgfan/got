@@ -1,4 +1,4 @@
-// author lby
+// author gmfan
 // date 2023/2/15
 
 package structs
@@ -45,7 +45,7 @@ func TestIsSerializable(t *testing.T) {
 				Name string
 				Age  int
 			}{
-				Name: "lby",
+				Name: "gmfan",
 				Age:  18,
 			},
 			want: true,
