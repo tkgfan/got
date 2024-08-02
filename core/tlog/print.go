@@ -28,7 +28,7 @@ type PrintFunc func(tid, level string, logStr string, frame CallFrame)
 // Print 打印函数，可自定义
 var Print PrintFunc = func(tid, level string, logStr string, frame CallFrame) {
 	str := fmt.Sprintf("at=%d tid=%s level=%s msg=[%s] caller=%s\n",
-		time.Now().UnixMilli(), tid, level, logStr, frame.File+":"+strconv.Itoa(frame.Line))
+		time.Now().UnixMicro(), tid, level, logStr, frame.File+":"+strconv.Itoa(frame.Line))
 	if level == ErrorLevel {
 		str = "\033[31m" + str + "\033[0m"
 	} else if level == WarnLevel {
