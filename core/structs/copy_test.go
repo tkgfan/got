@@ -41,10 +41,30 @@ type (
 		Age           int
 		Relationships []int
 	}
+
+	dstA struct {
+		Name string
+	}
+
+	srcB struct {
+		Name   string
+		SrcBBA srcBB
+	}
+
+	srcBB struct {
+		Name string
+	}
 )
 
 func TestCopyFields(t *testing.T) {
 	tests := []copyFieldsTest{
+		{
+			name:     "匿名字段测试",
+			src:      srcB{Name: "srcB", SrcBBA: srcBB{Name: "srcBB"}},
+			dst:      &dstA{},
+			expect:   &dstA{Name: "srcB"},
+			hasError: false,
+		},
 		{
 			name:     "值类型用例",
 			src:      people{Name: "people", Age: 18},

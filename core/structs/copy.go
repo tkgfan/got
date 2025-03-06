@@ -99,7 +99,7 @@ func copyValue(dst, src reflect.Value) {
 		df := dst.FieldByName(stf.Name)
 		if ok := df.IsValid(); !ok {
 			// stf 可能是匿名结构体
-			if stf.Type.Kind() == reflect.Struct {
+			if stf.Type.Kind() == reflect.Struct && stf.Anonymous {
 				copyValue(dst, src.Field(i))
 			}
 			continue
